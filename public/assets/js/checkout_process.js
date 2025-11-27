@@ -1,5 +1,43 @@
 // File: public/assets/js/checkout_process.js
 
+// const checkoutForm = document.getElementById('checkoutForm');
+// if (checkoutForm) {
+//     checkoutForm.addEventListener('submit', function(e) {
+//         e.preventDefault(); 
+
+//         const formData = new FormData(this);
+//         const submitBtn = this.querySelector('button[type="submit"]');
+        
+//         const originalText = submitBtn.innerHTML;
+//         submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+//         submitBtn.disabled = true;
+
+//         // PERUBAHAN KRITIS: Targetkan rute MVC baru
+//         fetch('index.php?page=checkout_process', { // Ganti dari 'checkout_process.php'
+//             method: 'POST',
+//             body: formData
+//         })
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.success) {
+//                 // Arahkan ke rute yang dikirim dari controller: index.php?page=thankyou
+//                 window.location.href = data.redirect || 'index.php?page=thankyou'; 
+//             } else {
+//                 alert("Error: " + data.message);
+//                 submitBtn.innerHTML = originalText;
+//                 submitBtn.disabled = false;
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//             alert("Terjadi kesalahan koneksi.");
+//             submitBtn.innerHTML = originalText;
+//             submitBtn.disabled = false;
+//         });
+//     });
+
+// File: public/assets/js/checkout_process.js
+
 const checkoutForm = document.getElementById('checkoutForm');
 if (checkoutForm) {
     checkoutForm.addEventListener('submit', function(e) {
@@ -8,34 +46,57 @@ if (checkoutForm) {
         const formData = new FormData(this);
         const submitBtn = this.querySelector('button[type="submit"]');
         
+        // Simpan teks asli tombol
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+        // Ubah tombol jadi loading
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
         submitBtn.disabled = true;
 
-        // PERUBAHAN KRITIS: Targetkan rute MVC baru
-        fetch('index.php?page=checkout_process', { // Ganti dari 'checkout_process.php'
+        // Kirim ke Controller
+        fetch('index.php?page=checkout_process', { 
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Arahkan ke rute yang dikirim dari controller: index.php?page=thankyou
-                window.location.href = data.redirect || 'index.php?page=thankyou'; 
-            } else {
-                alert("Error: " + data.message);
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
+        .then(response => {
+            // 1. Cek apakah koneksi HTTP sukses (200 OK)
+            if (!response.ok) {
+                throw new Error('Server Error: ' + response.status);
+            }
+            // 2. Ambil sebagai TEXT dulu, bukan langsung JSON
+            return response.text(); 
+        })
+        .then(text => {
+            // 3. Coba parsing text tersebut ke JSON
+            try {
+                const data = JSON.parse(text); // Ini langkah krusial
+                
+                if (data.success) {
+                    // SUKSES: Redirect
+                    window.location.href = data.redirect || 'index.php?page=thankyou'; 
+                } else {
+                    // GAGAL: Tampilkan pesan error dari PHP
+                    alert("Gagal: " + data.message);
+                    resetButton(submitBtn, originalText);
+                }
+            } catch (err) {
+                // 4. Jika gagal parsing JSON, berarti ada error PHP (Warning/Notice)
+                console.error("Respon Server Bukan JSON:", text); // Cek Console browser!
+                alert("Terjadi kesalahan sistem. Cek Console (F12) untuk detail.");
+                resetButton(submitBtn, originalText);
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert("Terjadi kesalahan koneksi.");
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
+            console.error('Fetch Error:', error);
+            alert("Terjadi kesalahan koneksi atau server: " + error.message);
+            resetButton(submitBtn, originalText);
         });
     });
+}
 
+function resetButton(btn, text) {
+    btn.innerHTML = text;
+    btn.disabled = false;
+}
     // File: public/assets/js/checkout_process.js
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -136,5 +197,4 @@ function updateCartBadge(count) {
     } else if (badge) {
         badge.remove();
     }
-}
 }

@@ -8,16 +8,13 @@ class CheckoutModel {
         $this->db = $dbConnection;
     }
 
-      // Fungsi utama: Mengambil detail semua produk yang ada di keranjang
+    // Mengambil detail produk
     public function getCartDetails($productIds) {
         if (empty($productIds)) {
             return [];
         }
-
-        // Membuat placeholder untuk query IN (contoh: ?, ?, ?)
+        // PostgreSQL menggunakan $1, $2, dll untuk placeholder, tapi PDO bisa pakai ?
         $placeholders = implode(',', array_fill(0, count($productIds), '?'));
-        
-        // Query untuk mengambil detail produk
         $sql = "SELECT id_product, name, price, image FROM product WHERE id_product IN ($placeholders)";
         
         try {
@@ -25,14 +22,15 @@ class CheckoutModel {
             $stmt->execute($productIds);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // Dalam kasus error database, return array kosong
             error_log("CartModel Error: " . $e->getMessage());
             return [];
         }
     }
     
+    // Get atau Create Customer (PostgreSQL Version)
     public function getOrCreateCustomer($name, $email, $address) {
         try {
+            // 1. Cek User
             $stmtCheck = $this->db->prepare("SELECT id_customer FROM customer WHERE email = :email LIMIT 1");
             $stmtCheck->execute([':email' => $email]);
             $existingCust = $stmtCheck->fetch(PDO::FETCH_ASSOC);
@@ -41,6 +39,7 @@ class CheckoutModel {
                 return (int)$existingCust['id_customer'];
             }
 
+            // 2. Insert User (Menggunakan syntax RETURNING id_customer milik PostgreSQL)
             $sqlInsert = "INSERT INTO customer (name, email, address) 
                           VALUES (:name, :email, :address) 
                           RETURNING id_customer";
@@ -52,8 +51,8 @@ class CheckoutModel {
                 ':address' => $address
             ]);
             
-            $newCust = $stmtInsert->fetch(PDO::FETCH_ASSOC);
-            return (int)$newCust['id_customer'];
+            // FetchColumn untuk mengambil hasil RETURNING
+            return (int)$stmtInsert->fetchColumn();
 
         } catch (PDOException $e) {
             error_log("CheckoutModel::getOrCreateCustomer Error: " . $e->getMessage());
@@ -61,22 +60,31 @@ class CheckoutModel {
         }
     }
 
+    // 🟢 EKSEKUSI PROCEDURE POSTGRESQL
     public function createTransaction($id_customer, $cartData) {
         try {
+            // 1. Ubah array PHP menjadi JSON String
             $jsonPayload = json_encode($cartData);
 
-            $sql = "CALL sp_add_transaction(:id_cust::int, :json_data::jsonb)";
+            // 2. Panggil Procedure
+            // PENTING: Kita casting ::jsonb di dalam query agar PostgreSQL paham
+            $sql = "CALL sp_add_transaction(:id_cust, :json_data::jsonb)";
             
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id_cust', $id_customer, PDO::PARAM_INT);
-            $stmt->bindParam(':json_data', $jsonPayload);
             
-            return $stmt->execute();
+            // Binding parameter dengan tipe data eksplisit
+            $stmt->bindParam(':id_cust', $id_customer, PDO::PARAM_INT); // Pastikan INT
+            $stmt->bindParam(':json_data', $jsonPayload, PDO::PARAM_STR); // Kirim sebagai string, nanti dicast ::jsonb oleh SQL
+            
+            $stmt->execute();
+            
+            return true;
 
         } catch (PDOException $e) {
             error_log("CheckoutModel::createTransaction Error: " . $e->getMessage());
+            // Tangkap pesan error dari "RAISE EXCEPTION" di prosedur SQL
+            throw new Exception($e->getMessage());
             return false;
         }
     }
 }
-?>
