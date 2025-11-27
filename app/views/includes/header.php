@@ -1,19 +1,11 @@
 <?php
-
-// 1. Definisikan $cart_Count
-$cart_count = 0;
+// Hitung cart count
+$cartCount = 0;
 if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
-    // Ambil semua nilai 'qty' dari array item cart
-    $quantities = array_column($_SESSION['cart'], 'qty');
-    
-    // Pastikan array_column tidak mengembalikan array kosong sebelum sum
-    if (!empty($quantities)) {
-        $cart_count = array_sum($quantities); // Jumlahkan semua kuantitas
+    foreach ($_SESSION['cart'] as $item) {
+        $cartCount += $item['qty'];
     }
 }
-
-// 2. Cek URL minta halaman apa? (Default: home)
-$page = isset($_GET['page']) ? $_GET['page'] : 'home';
 ?>
 
 
@@ -39,32 +31,38 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 </head>
 
 <body>
-    <nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
+    <nav class="custom-navbar navbar navbar-expand-md navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="index.php?page=home">Blace<span>.</span></a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarsFurni">
                 <ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
-                    <li class="nav-item active">
+                    <li class="nav-item">
                         <a class="nav-link" href="index.php?page=home">Home</a>
                     </li>
-                    <li><a class="nav-link" href="index.php?page=shop">Shop</a></li>
-                    <li><a class="nav-link" href="index.php?page=about">About us</a></li>
+                    <li>
+                        <a class="nav-link" href="index.php?page=shop">Shop</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="index.php?page=about">About us</a>
+                    </li>
                 </ul>
 
-                
-                 <ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
-                    <li><a class="nav-link" href="#"><img src="assets/images/user.svg"></a></li>
+                <ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
                     <li>
-                        <a class="nav-link position-relative" href="index.php?page=cart">
-                            <img src="assets/images/cart.svg">
-                            <?php 
-                            if ($cart_count > 0): ?>
-                            <span id="cart-count" class="cart-badge"><?= $cart_count ?></span>
+                        <a class="nav-link" href="index.php?page=login">
+                            <img src="assets/images/user.svg" alt="User">
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link position-relative" href="index.php?page=cart" id="cart-link">
+                            <img src="assets/images/cart.svg" alt="Cart">
+                            <?php if ($cartCount > 0): ?>
+                                <span class="cart-badge"><?= $cartCount ?></span>
                             <?php endif; ?>
                         </a>
                     </li>

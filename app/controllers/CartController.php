@@ -180,5 +180,25 @@ class CartController {
         header('Location: index.php?page=cart');
         exit;
     }
+
+   // Method untuk mengambil cart count (AJAX)
+// PERBAIKAN: Ganti method getCartCount() di CartController
+public function getCartCount() {
+    header('Content-Type: application/json');
+    ini_set('display_errors', 0); // Disable error display
+    
+    $cartCount = 0; // ✅ Konsisten dengan nama variabel
+    if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+        foreach ($_SESSION['cart'] as $item) {
+            $cartCount += $item['qty']; // ✅ Perbaiki dari $cart_count ke $cartCount
+        }
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'cart_count' => $cartCount
+    ]);
+    exit;
+}
 }
 ?>  

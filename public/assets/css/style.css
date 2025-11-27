@@ -735,12 +735,36 @@ textarea {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* Animasi ketika badge update */
-@keyframes cartBadgePulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
+
+.position-relative {
+    position: relative !important;
+    display: inline-block;
+}
+
+.cart-badge {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 50%;
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 10;
 }
 
 .cart-badge.updated {
-    animation: cartBadgePulse 0.3s ease;
+    animation: badgePulse 0.3s ease;
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
 }

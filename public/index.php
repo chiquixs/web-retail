@@ -1,14 +1,15 @@
 <?php
+ob_start();
 session_start();
 
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
-$cart_count = 0;
-if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
-    if (!empty($quantities)) {
-        $cart_count = array_sum($quantities);
+$cartCount = 0;
+if (!empty($_SESSION['cart'])) {
+    foreach ($_SESSION['cart'] as $item) {
+        $cartCount += $item['qty'];
     }
 }
 require_once '../app/config/database.php';
@@ -30,7 +31,7 @@ switch ($page) {
         $controller = new HomeController($pdo);
         $controller->index();
         break;
-    
+
     case 'cart':
         require_once '../app/controllers/CartController.php';
         $controller = new CartController($pdo);
@@ -48,21 +49,64 @@ switch ($page) {
         $controller = new CartController($pdo);
         $controller->update($_REQUEST);
         exit;
-    
+
     case 'remove_cart':
         require_once '../app/controllers/CartController.php';
         $controller = new CartController($pdo);
         $controller->remove($_GET);
         exit;
 
-    // TAMBAHKAN ROUTING CHECKOUT
+        // TAMBAHKAN ROUTING CHECKOUT
     case 'checkout':
+        // Clear all buffers before checkout
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
         require_once '../app/controllers/CheckoutController.php';
         $controller = new CheckoutController($pdo);
         $controller->process($_POST);
-        exit;
+        exit; 
+
+    case 'login':
+        require_once '../app/controllers/AuthController.php'; // 🎯 Controller baru untuk Auth
+        $controller = new AuthController($pdo);
+        $controller->showLoginForm(); // Panggil fungsi untuk menampilkan form
+        break;
+    
+    case 'process_login':
+    require_once '../app/controllers/AuthController.php';
+    $controller = new AuthController($pdo);
+    $controller->processLogin();
+    break;
+
+    case 'get_cart_count':
+    require_once '../app/controllers/CartController.php';
+    $controller = new CartController($pdo);
+    $controller->getCartCount();
+    exit;
+
+    case 'checkout_process':
+        require_once '../app/controllers/CheckoutController.php';
+        $controller = new CheckoutController($pdo);
+        // Pastikan Anda memanggil fungsi process()
+        $controller->process($_POST); 
+        break;
+
+   // ... code sebelumnya ...
+
+    case 'checkout_success':
+        // HAPUS baris echo lama:
+        // echo "<h1>Terima Kasih! Pesanan Anda berhasil.</h1>...";
+        
+        // GANTI dengan memanggil view baru:
+        require_once '../app/views/cart/thankyou.php';
+        break;
+
+    // ... code selanjutnya ...
+
 
     default:
         header('Location: index.php?page=home');
         exit;
 }
+ob_end_flush();

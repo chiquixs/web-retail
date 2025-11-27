@@ -35,7 +35,7 @@
 <script src="assets/js/custom.js"></script>
 
 <script src="assets/js/cart_logic.js"></script>
-<script src="assets/js/shop_ajax.js"></script>
+<!-- <script src="assets/js/shop_ajax.js"></script> -->
 <script src="assets/js/checkout_process.js"></script>
 </body>
 
