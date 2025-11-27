@@ -68,16 +68,33 @@ switch ($page) {
         exit; 
 
     case 'login':
-        require_once '../app/controllers/AuthController.php'; // 🎯 Controller baru untuk Auth
+        require_once '../app/controllers/admin/AuthController.php'; // 📂 Path ke Sub-folder Admin
         $controller = new AuthController($pdo);
-        $controller->showLoginForm(); // Panggil fungsi untuk menampilkan form
+        $controller->showLoginForm();
         break;
     
-    case 'process_login':
-    require_once '../app/controllers/AuthController.php';
-    $controller = new AuthController($pdo);
-    $controller->processLogin();
-    break;
+    case 'auth_login':
+        require_once '../app/controllers/admin/AuthController.php';
+        $controller = new AuthController($pdo);
+        $controller->login($_POST); // Kirim data $_POST ke fungsi login
+        break;
+
+    case 'logout':
+        require_once '../app/controllers/admin/AuthController.php';
+        $controller = new AuthController($pdo);
+        $controller->logout();
+        break;
+    
+        case 'admin_dashboard':
+        // Cek apakah sudah login?
+        if (empty($_SESSION['admin_logged_in'])) {
+            header("Location: index.php?page=login");
+            exit;
+        }
+        require_once '../app/controllers/Admin/DashboardController.php';
+        $controller = new DashboardController($pdo);
+        $controller->index();
+        break;
 
     case 'get_cart_count':
     require_once '../app/controllers/CartController.php';

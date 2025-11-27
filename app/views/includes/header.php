@@ -58,13 +58,12 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
                             <img src="assets/images/user.svg" alt="User">
                         </a>
                     </li>
-                    <li>
-                        <a class="nav-link position-relative" href="index.php?page=cart" id="cart-link">
-                            <img src="assets/images/cart.svg" alt="Cart">
-                            <?php if ($cartCount > 0): ?>
-                                <span class="cart-badge"><?= $cartCount ?></span>
-                            <?php endif; ?>
-                        </a>
+                    <a class="nav-link position-relative" href="index.php?page=cart" id="cart-link">
+                        <img src="assets/images/cart.svg" alt="Cart">
+                        <?php if ($cartCount > 0): ?>
+                            <span class="cart-badge"><?= $cartCount ?></span>
+                        <?php endif; ?>
+                    </a>
                     </li>
                 </ul>
             </div>
