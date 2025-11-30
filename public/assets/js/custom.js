@@ -125,3 +125,4 @@ async function ajaxAddToCart(event, productId, productName, productPrice) {
         console.error('Error AJAX:', error);
     }
 }
+

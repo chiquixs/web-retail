@@ -1,200 +1,260 @@
 // File: public/assets/js/checkout_process.js
+// ✅ CORRECTED: Using checkout_process endpoint
 
-// const checkoutForm = document.getElementById('checkoutForm');
-// if (checkoutForm) {
-//     checkoutForm.addEventListener('submit', function(e) {
-//         e.preventDefault(); 
+let isCheckoutInProgress = false;
 
-//         const formData = new FormData(this);
-//         const submitBtn = this.querySelector('button[type="submit"]');
-        
-//         const originalText = submitBtn.innerHTML;
-//         submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
-//         submitBtn.disabled = true;
-
-//         // PERUBAHAN KRITIS: Targetkan rute MVC baru
-//         fetch('index.php?page=checkout_process', { // Ganti dari 'checkout_process.php'
-//             method: 'POST',
-//             body: formData
-//         })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.success) {
-//                 // Arahkan ke rute yang dikirim dari controller: index.php?page=thankyou
-//                 window.location.href = data.redirect || 'index.php?page=thankyou'; 
-//             } else {
-//                 alert("Error: " + data.message);
-//                 submitBtn.innerHTML = originalText;
-//                 submitBtn.disabled = false;
-//             }
-//         })
-//         .catch(error => {
-//             console.error('Error:', error);
-//             alert("Terjadi kesalahan koneksi.");
-//             submitBtn.innerHTML = originalText;
-//             submitBtn.disabled = false;
-//         });
-//     });
-
-// File: public/assets/js/checkout_process.js
-
-const checkoutForm = document.getElementById('checkoutForm');
-if (checkoutForm) {
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('======================');
+    console.log('✅ checkout_process.js loaded');
+    console.log('Current URL:', window.location.href);
+    console.log('======================');
+    
+    const checkoutForm = document.getElementById('checkoutForm');
+    
+    if (!checkoutForm) {
+        console.log('⚠️ No checkout form found on this page');
+        return;
+    }
+    
+    console.log('✅ Checkout form found, attaching listener');
+    console.log('Form ID:', checkoutForm.id);
+    
+    // ✅ CRITICAL: Only ONE event listener
     checkoutForm.addEventListener('submit', function(e) {
-        e.preventDefault(); 
-
-        const formData = new FormData(this);
-        const submitBtn = this.querySelector('button[type="submit"]');
+        e.preventDefault();
+        e.stopPropagation();
         
-        // Simpan teks asli tombol
+        // Prevent double submit
+        if (isCheckoutInProgress) {
+            console.warn('⚠️ Checkout already in progress, ignoring...');
+            return;
+        }
+        
+        isCheckoutInProgress = true;
+        console.log('=== 🛒 CHECKOUT STARTED ===');
+        console.log('Timestamp:', new Date().toISOString());
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        // Ubah tombol jadi loading
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        
+        // Disable button immediately
         submitBtn.disabled = true;
-
-        // Kirim ke Controller
-        fetch('index.php?page=checkout_process', { 
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
+        
+        const formData = new FormData(this);
+        
+        // Log form data for debugging
+        console.log('Form data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+        
+        // ✅ Send to checkout_process endpoint
+        console.log('📤 Sending request to: index.php?page=checkout_process');
+        
+        fetch('index.php?page=checkout_process', {
             method: 'POST',
             body: formData
         })
         .then(response => {
-            // 1. Cek apakah koneksi HTTP sukses (200 OK)
+            console.log('📥 Response received');
+            console.log('Status:', response.status);
+            console.log('OK:', response.ok);
+            
             if (!response.ok) {
-                throw new Error('Server Error: ' + response.status);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            // 2. Ambil sebagai TEXT dulu, bukan langsung JSON
-            return response.text(); 
+            return response.text();
         })
         .then(text => {
-            // 3. Coba parsing text tersebut ke JSON
+            console.log('📄 Raw response (first 500 chars):');
+            console.log(text.substring(0, 500));
+            
+            let data;
             try {
-                const data = JSON.parse(text); // Ini langkah krusial
+                data = JSON.parse(text);
+                console.log('✅ JSON parsed successfully');
+            } catch (e) {
+                console.error('❌ JSON parse error:', e);
+                console.error('Full response:', text);
+                throw new Error('Invalid JSON response from server');
+            }
+            
+            console.log('📦 Parsed data:', data);
+            
+            if (data.success) {
+                console.log('=== ✅ CHECKOUT SUCCESS ===');
                 
-                if (data.success) {
-                    // SUKSES: Redirect
-                    window.location.href = data.redirect || 'index.php?page=thankyou'; 
-                } else {
-                    // GAGAL: Tampilkan pesan error dari PHP
-                    alert("Gagal: " + data.message);
-                    resetButton(submitBtn, originalText);
+                // Show success message
+                showSuccessMessage(data.message);
+                
+                // Close modal
+                const modalElement = document.getElementById('checkoutModal');
+                if (modalElement) {
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
                 }
-            } catch (err) {
-                // 4. Jika gagal parsing JSON, berarti ada error PHP (Warning/Notice)
-                console.error("Respon Server Bukan JSON:", text); // Cek Console browser!
-                alert("Terjadi kesalahan sistem. Cek Console (F12) untuk detail.");
+                
+                // Clean up modal backdrop
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+                
+                // Update cart badge to 0
+                if (typeof updateCartBadge === 'function') {
+                    updateCartBadge(0);
+                }
+                
+                // Redirect
+                console.log('🔄 Redirecting to home in 1.5 seconds...');
+                setTimeout(() => {
+                    window.location.href = 'index.php?page=home';
+                }, 1500);
+                
+            } else {
+                console.error('=== ❌ CHECKOUT FAILED ===');
+                console.error('Error message:', data.message);
+                
+                showErrorMessage(data.message);
                 resetButton(submitBtn, originalText);
+                isCheckoutInProgress = false;
             }
         })
         .catch(error => {
-            console.error('Fetch Error:', error);
-            alert("Terjadi kesalahan koneksi atau server: " + error.message);
+            console.error('=== ❌ CHECKOUT ERROR ===');
+            console.error('Error:', error);
+            console.error('Stack:', error.stack);
+            
+            showErrorMessage('Terjadi kesalahan: ' + error.message);
             resetButton(submitBtn, originalText);
+            isCheckoutInProgress = false;
         });
     });
-}
-
-function resetButton(btn, text) {
-    btn.innerHTML = text;
-    btn.disabled = false;
-}
-    // File: public/assets/js/checkout_process.js
-
-document.addEventListener('DOMContentLoaded', function() {
-    const checkoutForm = document.getElementById('checkoutForm');
-    
-    if (checkoutForm) {
-        checkoutForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Disable submit button to prevent double submission
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
-            
-            // Get form data
-            const formData = new FormData(this);
-            
-            // Send AJAX request
-            fetch('index.php?page=checkout', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    showAlert('success', data.message);
-                    
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
-                    modal.hide();
-                    
-                    // Reset form
-                    checkoutForm.reset();
-                    
-                    // Update cart badge to 0
-                    updateCartBadge(0);
-                    
-                    // Redirect to home after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = 'index.php?page=home';
-                    }, 2000);
-                } else {
-                    // Show error message
-                    showAlert('error', data.message);
-                    
-                    // Re-enable button
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('error', 'Terjadi kesalahan. Silakan coba lagi.');
-                
-                // Re-enable button
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            });
-        });
-    }
 });
 
-// Show alert notification
-function showAlert(type, message) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-    alertDiv.style.cssText = `
+function resetButton(btn, originalText) {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+}
+
+function showSuccessMessage(message) {
+    removeAllAlerts();
+    
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-success checkout-alert';
+    alert.style.cssText = `
         position: fixed;
-        top: 20px;
+        top: 80px;
         right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        min-width: 350px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        border-left: 4px solid #10b981;
+        animation: slideIn 0.3s ease;
+        background: white;
     `;
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    alert.innerHTML = `
+        <i class="fas fa-check-circle me-3" style="font-size: 24px; color: #10b981;"></i>
+        <span style="font-size: 15px; font-weight: 500;">${message}</span>
     `;
     
-    document.body.appendChild(alertDiv);
+    document.body.appendChild(alert);
+}
+
+function showErrorMessage(message) {
+    removeAllAlerts();
+    
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-danger checkout-alert';
+    alert.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 10000;
+        min-width: 350px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        border-left: 4px solid #ef4444;
+        animation: slideIn 0.3s ease;
+        background: white;
+    `;
+    alert.innerHTML = `
+        <i class="fas fa-exclamation-circle me-3" style="font-size: 24px; color: #ef4444;"></i>
+        <span style="font-size: 15px; font-weight: 500;">${message}</span>
+        <button type="button" class="btn-close ms-auto" onclick="this.parentElement.remove()"></button>
+    `;
+    
+    document.body.appendChild(alert);
     
     // Auto remove after 5 seconds
     setTimeout(() => {
-        alertDiv.remove();
+        alert.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => alert.remove(), 300);
     }, 5000);
 }
 
-// Update cart badge (reuse from cart_logic.js)
+function removeAllAlerts() {
+    document.querySelectorAll('.checkout-alert').forEach(el => el.remove());
+}
+
+// Update cart badge function (if not defined elsewhere)
 function updateCartBadge(count) {
-    const badge = document.querySelector('.cart-badge');
+    const cartLink = document.getElementById('cart-link') || 
+                     document.querySelector('a[href*="cart"]');
+    
+    if (!cartLink) return;
+    
+    let badge = cartLink.querySelector('.cart-badge');
     
     if (count > 0) {
         if (badge) {
             badge.textContent = count;
+        } else {
+            badge = document.createElement('span');
+            badge.className = 'cart-badge';
+            badge.textContent = count;
+            cartLink.appendChild(badge);
         }
     } else if (badge) {
         badge.remove();
     }
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+`;
+
+if (!document.getElementById('checkout-animation-styles')) {
+    style.id = 'checkout-animation-styles';
+    document.head.appendChild(style);
 }

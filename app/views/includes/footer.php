@@ -1,7 +1,5 @@
 <footer class="footer-section">
 	<div class="container relative">
-
-
 		<div class="row g-5 mb-5">
 			<div class="col-lg-4">
 				<div class="mb-4 footer-logo-wrap"><a href="#" class="footer-logo">Furni<span>.</span></a></div>
@@ -34,9 +32,20 @@
 <script src="assets/js/tiny-slider.js"></script>
 <script src="assets/js/custom.js"></script>
 
+<?php 
+// ✅ Load cart_logic.js hanya untuk halaman shop dan home
+$currentPage = $_GET['page'] ?? 'home';
+if (in_array($currentPage, ['shop', 'home'])): 
+?>
 <script src="assets/js/cart_logic.js"></script>
-<!-- <script src="assets/js/shop_ajax.js"></script> -->
-<script src="assets/js/checkout_process.js"></script>
-</body>
+<?php endif; ?>
 
+<?php 
+// ✅ Load checkout_process.js HANYA untuk halaman cart
+if ($currentPage === 'cart'): 
+?>
+<script src="assets/js/checkout_process.js"></script>
+<?php endif; ?>
+
+</body>
 </html>

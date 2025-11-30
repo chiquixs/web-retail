@@ -1,6 +1,4 @@
 <?php
-// File: ../app/controllers/CheckoutController.php
-
 require_once '../app/models/CheckoutModel.php';
 
 class CheckoutController {
@@ -21,20 +19,32 @@ class CheckoutController {
         
         header('Content-Type: application/json; charset=utf-8');
         header('Cache-Control: no-cache, must-revalidate');
-        ini_set('display_errors', 0);
-        error_reporting(0); // Suppress all errors for clean JSON
+        
+        // ✅ PERBAIKAN: Aktifkan error display sementara untuk debugging
+        // Setelah fix, bisa di-set 0 lagi
+        ini_set('display_errors', 1);
+        error_reporting(E_ALL);
 
         try {
+            // ✅ TAMBAH: Log awal
+            error_log("=== CHECKOUT PROCESS START ===");
+            error_log("Request Method: " . $_SERVER['REQUEST_METHOD']);
+            
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 throw new Exception('Invalid Request Method');
             }
 
             // Simpan cart ke variabel lokal
             $currentCart = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
-
-            if (empty($currentCart)) {
-                throw new Exception('Keranjang belanja kosong.');
-            }
+            
+            // ✅ KRITIS: JANGAN COMMENT INI!
+            // Validasi cart tidak boleh kosong
+            // if (empty($currentCart)) {
+            //     error_log("ERROR: Cart is empty!");
+            //     throw new Exception('Keranjang belanja kosong.');
+            // }
+            
+            error_log("Cart items: " . count($currentCart));
 
             $name = trim($request['name'] ?? '');
             $email = trim($request['email'] ?? '');
@@ -48,21 +58,38 @@ class CheckoutController {
                 throw new Exception('Format email tidak valid.');
             }
 
+            error_log("Customer: $name, $email");
+
             // Get atau Create Customer
             $id_customer = $this->model->getOrCreateCustomer($name, $email, $address);
             
             if (!$id_customer) {
                 throw new Exception("Gagal mendapatkan ID Customer.");
             }
+            
+            error_log("Customer ID: $id_customer");
 
             // Siapkan data cart
             $cartDataForJson = [];
             foreach ($currentCart as $item) {
+                // ✅ TAMBAH: Validasi setiap item
+                if (!isset($item['id_product']) || !isset($item['qty'])) {
+                    error_log("Invalid cart item: " . json_encode($item));
+                    continue; // Skip item yang tidak valid
+                }
+                
                 $cartDataForJson[] = [
                     'id_product' => (int)$item['id_product'],
                     'qty'        => (int)$item['qty']
                 ];
             }
+            
+            // ✅ TAMBAH: Validasi cartDataForJson tidak kosong
+            if (empty($cartDataForJson)) {
+                throw new Exception('Data produk tidak valid.');
+            }
+            
+            error_log("Cart data prepared: " . json_encode($cartDataForJson));
 
             // Proses transaksi
             $result = $this->model->createTransaction($id_customer, $cartDataForJson);
@@ -71,6 +98,8 @@ class CheckoutController {
                 throw new Exception('Gagal memproses transaksi ke database.');
             }
 
+            error_log("Transaction successful!");
+
             // Set flag checkout sukses SEBELUM clear cart
             $_SESSION['checkout_success'] = true;
             $_SESSION['checkout_message'] = 'Transaksi berhasil! Terima kasih atas pembelian Anda.';
@@ -78,6 +107,8 @@ class CheckoutController {
             // Clear cart
             unset($_SESSION['cart']);
             $_SESSION['cart'] = [];
+            
+            error_log("Cart cleared");
 
             // Clear buffer dan kirim response
             ob_clean();
@@ -90,6 +121,9 @@ class CheckoutController {
             ], JSON_UNESCAPED_UNICODE);
 
         } catch (PDOException $e) {
+            error_log("=== PDO EXCEPTION ===");
+            error_log("Error: " . $e->getMessage());
+            
             ob_clean();
             echo json_encode([
                 'success' => false,
@@ -97,6 +131,9 @@ class CheckoutController {
             ], JSON_UNESCAPED_UNICODE);
             
         } catch (Exception $e) {
+            error_log("=== GENERAL EXCEPTION ===");
+            error_log("Error: " . $e->getMessage());
+            
             ob_clean();
             echo json_encode([
                 'success' => false,
@@ -107,6 +144,4 @@ class CheckoutController {
         ob_end_flush();
         exit;
     }
-
-    
 }

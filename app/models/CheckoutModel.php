@@ -60,31 +60,60 @@ class CheckoutModel {
         }
     }
 
-    // 🟢 EKSEKUSI PROCEDURE POSTGRESQL
-    public function createTransaction($id_customer, $cartData) {
-        try {
-            // 1. Ubah array PHP menjadi JSON String
-            $jsonPayload = json_encode($cartData);
+public function createTransaction($id_customer, $cartData) {
+    try {
+        // Validasi input
+        if (empty($cartData)) {
+            throw new Exception("Data keranjang kosong.");
+        }
 
-            // 2. Panggil Procedure
-            // PENTING: Kita casting ::jsonb di dalam query agar PostgreSQL paham
-            $sql = "CALL sp_add_transaction(:id_cust, :json_data::jsonb)";
-            
-            $stmt = $this->db->prepare($sql);
-            
-            // Binding parameter dengan tipe data eksplisit
-            $stmt->bindParam(':id_cust', $id_customer, PDO::PARAM_INT); // Pastikan INT
-            $stmt->bindParam(':json_data', $jsonPayload, PDO::PARAM_STR); // Kirim sebagai string, nanti dicast ::jsonb oleh SQL
-            
-            $stmt->execute();
-            
-            return true;
+        // LANGKAH 1: Ubah Array PHP menjadi String JSON
+        $jsonPayload = json_encode($cartData);
 
-        } catch (PDOException $e) {
-            error_log("CheckoutModel::createTransaction Error: " . $e->getMessage());
-            // Tangkap pesan error dari "RAISE EXCEPTION" di prosedur SQL
-            throw new Exception($e->getMessage());
-            return false;
+        if ($jsonPayload === false) {
+            throw new Exception("Gagal mengubah data keranjang menjadi JSON.");
+        }
+
+        // Log untuk debugging (opsional, bisa dihapus di production)
+        error_log("Creating transaction for customer: $id_customer");
+        error_log("Cart JSON: $jsonPayload");
+
+        // LANGKAH 2: Siapkan Query
+        $sql = "CALL sp_add_transaction(:id_cust, CAST(:json_data AS jsonb))";
+        
+        $stmt = $this->db->prepare($sql);
+        
+        // LANGKAH 3: Binding Parameter
+        $stmt->bindParam(':id_cust', $id_customer, PDO::PARAM_INT);
+        $stmt->bindParam(':json_data', $jsonPayload, PDO::PARAM_STR); 
+        
+        // LANGKAH 4: Eksekusi
+        $result = $stmt->execute();
+        
+        if (!$result) {
+            throw new Exception("Gagal mengeksekusi stored procedure.");
+        }
+        
+        error_log("Transaction created successfully!");
+        
+        return true;
+
+    } catch (PDOException $e) {
+        // Log error lengkap untuk developer
+        error_log("CheckoutModel::createTransaction SQL Error: " . $e->getMessage());
+        error_log("SQL State: " . $e->getCode());
+        
+        // Tangkap pesan error dari stored procedure (RAISE EXCEPTION)
+        $errorMsg = $e->getMessage();
+        
+        // Cek apakah error dari validasi stok di SP
+        if (strpos($errorMsg, 'Stok tidak cukup') !== false) {
+            throw new Exception($errorMsg);
+        } elseif (strpos($errorMsg, 'tidak ditemukan') !== false) {
+            throw new Exception($errorMsg);
+        } else {
+            throw new Exception("Gagal memproses transaksi: " . $errorMsg);
         }
     }
+}
 }

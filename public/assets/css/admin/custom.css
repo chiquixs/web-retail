@@ -1,0 +1,13 @@
+/* Backdrop Blur untuk Modal */
+/* [modal-backdrop] {
+    backdrop-filter: blur(5px);
+background-color: rgba(0, 0, 0, 0.2);
+    -webkit-backdrop-filter: blur(8px) !important;
+} */
+
+/* Atau lebih spesifik untuk Flowbite modal */
+/* .fixed.inset-0.z-40 {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+} */

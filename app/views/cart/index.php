@@ -138,8 +138,8 @@
     </div>
 </div>
 
-<script>
-// ===== CART FUNCTIONS =====
+
+<script> 
 
 function formatRupiah(angka) {
     return 'Rp' + new Intl.NumberFormat('id-ID').format(angka);
@@ -264,178 +264,13 @@ function updateCartBadgeFromCart() {
     updateCartBadge(totalQty);
 }
 
-// ===== CHECKOUT FORM HANDLER =====
-
-let isCheckoutInProgress = false; // Flag to prevent multiple submits
-
+// ===== INITIALIZE ON PAGE LOAD =====
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Cart page initialized');
     calculateGrandTotal();
     
-    const checkoutForm = document.getElementById('checkoutForm');
-    
-    if (checkoutForm) {
-        checkoutForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Prevent double submit
-            if (isCheckoutInProgress) {
-                console.log('Checkout already in progress');
-                return;
-            }
-            
-            isCheckoutInProgress = true;
-            console.log('=== CHECKOUT STARTED ===');
-            
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
-            
-            const formData = new FormData(this);
-            
-            fetch('index.php?page=checkout', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(text => {
-                console.log('Raw response:', text.substring(0, 200));
-                
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    console.error('JSON parse error:', e);
-                    throw new Error('Invalid JSON response');
-                }
-                
-                console.log('Parsed data:', data);
-                
-                if (data.success) {
-                    console.log('=== CHECKOUT SUCCESS ===');
-                    
-                    // Show success message
-                    showSuccessMessage(data.message);
-                    
-                    // Close modal immediately
-                    const modalElement = document.getElementById('checkoutModal');
-                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                    if (modalInstance) {
-                        modalInstance.hide();
-                    }
-                    
-                    // Remove modal backdrop
-                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                    document.body.classList.remove('modal-open');
-                    document.body.style.removeProperty('overflow');
-                    document.body.style.removeProperty('padding-right');
-                    
-                    // Update badge to 0 immediately
-                    updateCartBadge(0);
-                    
-                    // Redirect after 1.5 seconds
-                    setTimeout(() => {
-                        window.location.href = 'index.php?page=home';
-                    }, 1500);
-                    
-                } else {
-                    console.error('=== CHECKOUT FAILED ===');
-                    console.error('Error:', data.message);
-                    
-                    showErrorMessage(data.message);
-                    
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                    isCheckoutInProgress = false;
-                }
-            })
-            .catch(error => {
-                console.error('=== CHECKOUT ERROR ===');
-                console.error('Error:', error);
-                
-                showErrorMessage('Terjadi kesalahan: ' + error.message);
-                
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-                isCheckoutInProgress = false;
-            });
-        });
-    }
+    // ⚠️ CHECKOUT HANDLER ADA DI checkout_process.js
+    // JANGAN TAMBAHKAN EVENT LISTENER CHECKOUT DI SINI!
 });
-
-function showSuccessMessage(message) {
-    document.querySelectorAll('.checkout-alert').forEach(el => el.remove());
-    
-    const alert = document.createElement('div');
-    alert.className = 'alert alert-success checkout-alert';
-    alert.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        z-index: 10000;
-        min-width: 350px;
-        padding: 20px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        border-left: 4px solid #10b981;
-        animation: slideIn 0.3s ease;
-    `;
-    alert.innerHTML = `
-        <i class="fas fa-check-circle me-3" style="font-size: 24px; color: #10b981;"></i>
-        <span style="font-size: 15px; font-weight: 500;">${message}</span>
-    `;
-    
-    document.body.appendChild(alert);
-}
-
-function showErrorMessage(message) {
-    document.querySelectorAll('.checkout-alert').forEach(el => el.remove());
-    
-    const alert = document.createElement('div');
-    alert.className = 'alert alert-danger checkout-alert';
-    alert.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        z-index: 10000;
-        min-width: 350px;
-        padding: 20px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        border-left: 4px solid #ef4444;
-        animation: slideIn 0.3s ease;
-    `;
-    alert.innerHTML = `
-        <i class="fas fa-exclamation-circle me-3" style="font-size: 24px; color: #ef4444;"></i>
-        <span style="font-size: 15px; font-weight: 500;">${message}</span>
-        <button type="button" class="btn-close ms-auto" onclick="this.parentElement.remove()"></button>
-    `;
-    
-    document.body.appendChild(alert);
-}
-
-// Add CSS animation
-const checkoutStyle = document.createElement('style');
-checkoutStyle.textContent = `
-    @keyframes slideIn {
-        from { 
-            transform: translateX(400px); 
-            opacity: 0; 
-        }
-        to { 
-            transform: translateX(0); 
-            opacity: 1; 
-        }
-    }
-`;
-document.head.appendChild(checkoutStyle);
-</script>
+</script> 
 <?php include '../app/views/includes/footer.php'; ?>

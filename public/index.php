@@ -12,6 +12,7 @@ if (!empty($_SESSION['cart'])) {
         $cartCount += $item['qty'];
     }
 }
+
 require_once '../app/config/database.php';
 
 $dbConnection = new Koneksi();
@@ -20,18 +21,22 @@ $pdo = $dbConnection->getKoneksi();
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
 switch ($page) {
-    case 'shop':
-        require_once '../app/controllers/ProductController.php';
-        $controller = new ProductController($pdo);
-        $controller->index();
-        break;
-
+    // ===== PUBLIC PAGES =====
+    
     case 'home':
         require_once '../app/controllers/HomeController.php';
         $controller = new HomeController($pdo);
         $controller->index();
         break;
 
+    case 'shop':
+        require_once '../app/controllers/ProductController.php';
+        $controller = new ProductController($pdo);
+        $controller->index();
+        break;
+
+    // ===== CART OPERATIONS =====
+    
     case 'cart':
         require_once '../app/controllers/CartController.php';
         $controller = new CartController($pdo);
@@ -56,27 +61,41 @@ switch ($page) {
         $controller->remove($_GET);
         exit;
 
-        // TAMBAHKAN ROUTING CHECKOUT
-    case 'checkout':
-        // Clear all buffers before checkout
+    case 'get_cart_count':
+        require_once '../app/controllers/CartController.php';
+        $controller = new CartController($pdo);
+        $controller->getCartCount();
+        exit;
+
+    // ===== CHECKOUT =====
+    
+    case 'checkout_process':
+        // Clear all buffers
         while (ob_get_level()) {
             ob_end_clean();
         }
+        
         require_once '../app/controllers/CheckoutController.php';
         $controller = new CheckoutController($pdo);
         $controller->process($_POST);
-        exit; 
+        exit; // ✅ CRITICAL: Must have exit!
 
+    case 'checkout_success':
+        require_once '../app/views/cart/thankyou.php';
+        break;
+
+    // ===== AUTHENTICATION =====
+    
     case 'login':
-        require_once '../app/controllers/admin/AuthController.php'; // 📂 Path ke Sub-folder Admin
+        require_once '../app/controllers/admin/AuthController.php';
         $controller = new AuthController($pdo);
         $controller->showLoginForm();
         break;
-    
+
     case 'auth_login':
         require_once '../app/controllers/admin/AuthController.php';
         $controller = new AuthController($pdo);
-        $controller->login($_POST); // Kirim data $_POST ke fungsi login
+        $controller->login($_POST);
         break;
 
     case 'logout':
@@ -84,46 +103,115 @@ switch ($page) {
         $controller = new AuthController($pdo);
         $controller->logout();
         break;
+
+    // ===== ADMIN DASHBOARD =====
     
-        case 'admin_dashboard':
-        // Cek apakah sudah login?
+    case 'admin_dashboard':
         if (empty($_SESSION['admin_logged_in'])) {
             header("Location: index.php?page=login");
             exit;
         }
-        require_once '../app/controllers/Admin/DashboardController.php';
+        require_once '../app/controllers/admin/DashboardController.php';
         $controller = new DashboardController($pdo);
         $controller->index();
         break;
 
-    case 'get_cart_count':
-    require_once '../app/controllers/CartController.php';
-    $controller = new CartController($pdo);
-    $controller->getCartCount();
-    exit;
+    // ===== ADMIN PRODUCT MANAGEMENT =====
+    
+    case 'admin_product':
+        if (empty($_SESSION['admin_logged_in'])) {
+            header("Location: index.php?page=login");
+            exit;
+        }
 
-    case 'checkout_process':
-        require_once '../app/controllers/CheckoutController.php';
-        $controller = new CheckoutController($pdo);
-        // Pastikan Anda memanggil fungsi process()
-        $controller->process($_POST); 
+        require_once '../app/controllers/cms/cmsProductController.php';
+        $controller = new ProductController($pdo);
+
+        $action = $_GET['action'] ?? 'index';
+
+        switch ($action) {
+            case 'add':
+                $controller->add($_POST);
+                break;
+            case 'update':
+                $controller->update($_POST);
+                break;
+            case 'delete':
+                $controller->delete($_POST);
+                break;
+            case 'get_categories':
+                $controller->getCategories();
+                break;
+            case 'get_suppliers':
+                $controller->getSuppliers();
+                break;
+            default:
+                $controller->index();
+        }
         break;
 
-   // ... code sebelumnya ...
+    // ===== ADMIN CATEGORY MANAGEMENT =====
+    
+    case 'admin_category':
+        if (empty($_SESSION['admin_logged_in'])) {
+            header("Location: index.php?page=login");
+            exit;
+        }
 
-    case 'checkout_success':
-        // HAPUS baris echo lama:
-        // echo "<h1>Terima Kasih! Pesanan Anda berhasil.</h1>...";
-        
-        // GANTI dengan memanggil view baru:
-        require_once '../app/views/cart/thankyou.php';
+        require_once '../app/controllers/cms/CategoryController.php';
+        $controller = new CategoryController($pdo);
+
+        $action = $_GET['action'] ?? 'index';
+
+        switch ($action) {
+            case 'add':
+                $controller->add($_POST);
+                break;
+            case 'update':
+                $controller->update($_POST);
+                break;
+            case 'delete':
+                $controller->delete($_POST);
+                break;
+            default:
+                $controller->index();
+        }
         break;
 
-    // ... code selanjutnya ...
+    // ===== ADMIN SUPPLIER MANAGEMENT =====
+    
+    case 'admin_supplier':
+        if (empty($_SESSION['admin_logged_in'])) {
+            header("Location: index.php?page=login");
+            exit;
+        }
 
+        require_once '../app/controllers/cms/SupplierController.php';
+        $controller = new SupplierController($pdo);
 
+        $action = $_GET['action'] ?? 'index';
+
+        switch ($action) {
+            case 'add':
+                $controller->add($_POST);
+                break;
+            case 'update':
+                $controller->update($_POST);
+                break;
+            case 'delete':
+                $controller->delete($_POST);
+                break;
+            default:
+                $controller->index();
+        }
+        break;
+
+    // ===== DEFAULT =====
+    
     default:
         header('Location: index.php?page=home');
         exit;
 }
+
 ob_end_flush();
+?>
