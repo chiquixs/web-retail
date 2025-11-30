@@ -1,13 +1,28 @@
 <?php
-class HomeController {
+// File: app/controllers/HomeController.php
 
-    // Konstruktor (walaupun tidak dipakai, tetap dipertahankan)
+require_once '../app/models/HomeModel.php';
+
+class HomeController {
+    private $model;
+    private $db;
+
     public function __construct($db) {
-        // Tidak ada Model yang dipanggil untuk Home
+        $this->db = $db;
+        $this->model = new HomeModel($db);
     }
 
     public function index() {
-        // Langsung panggil tampilan Home
+        // Get top 3 best selling products
+        $topProducts = $this->model->getTopSellingProducts(3);
+        
+        // Pass data to view
+        $data = [
+            'topProducts' => $topProducts,
+            'pageTitle' => 'Home - Blace Furniture'
+        ];
+        
+        // Load view
         require_once '../app/views/home/index.php';
     }
 }

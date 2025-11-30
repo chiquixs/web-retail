@@ -108,10 +108,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateCartBadge(0);
                 }
                 
-                // Redirect
-                console.log('🔄 Redirecting to home in 1.5 seconds...');
+                // Redirect to checkout success page or fallback to home
+                const redirectUrl = data.redirect || 'index.php?page=checkout_success';
+                console.log('🔄 Redirecting to:', redirectUrl, 'in 1.5 seconds...');
                 setTimeout(() => {
-                    window.location.href = 'index.php?page=home';
+                    window.location.href = redirectUrl;
                 }, 1500);
                 
             } else {

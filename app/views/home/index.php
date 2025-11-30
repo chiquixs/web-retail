@@ -1,194 +1,191 @@
 <?php include '../app/views/includes/header.php'; ?>
 
-	<!-- Start Hero Section -->
-			<div class="hero">
-				<div class="container">
-					<div class="row justify-content-between">
-						<div class="col-lg-5">
-							<div class="intro-excerpt">
-								<h1>Modern Interior <span clsas="d-block">Home Furniture</span></h1>
-								<p class="mb-4">Discover a curated collection of stylish, functional, and high-quality home furniture designed to elevate every room in your living space. From cozy sofas and elegant dining sets to modern storage solutions and bedroom essentials, we bring you pieces that blend comfort, durability, and timeless design.</p>
-								<p><a href="" class="btn btn-secondary me-2">Shop Now</a><a href="#" class="btn btn-white-outline">Explore</a></p>
-							</div>
-						</div>
-						<div class="col-lg-7">
-							<div class="hero-img-wrap">
-								<img src="/web-retail-rev/public/assets/images/couch.png" class="img-fluid">
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		<!-- End Hero Section -->
+<!-- Start Hero Section -->
+<div class="hero">
+    <div class="container">
+        <div class="row justify-content-between">
+            <div class="col-lg-5">
+                <div class="intro-excerpt">
+                    <h1>Modern Interior <span class="d-block">Home Furniture</span></h1>
+                    <p class="mb-4">Discover a curated collection of stylish, functional, and high-quality home furniture designed to elevate every room in your living space. From cozy sofas and elegant dining sets to modern storage solutions and bedroom essentials, we bring you pieces that blend comfort, durability, and timeless design.</p>
+                    <p>
+                        <a href="index.php?page=shop" class="btn btn-secondary me-2">Shop Now</a>
+                        <a href="#products" class="btn btn-white-outline">Explore</a>
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="hero-img-wrap">
+                    <img src="assets/images/couch.png" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Hero Section -->
 
-		<!-- Start Product Section -->
-		<div class="product-section">
-			<div class="container">
-				<div class="row">
+<!-- Start Product Section -->
+<div class="product-section" id="products">
+    <div class="container">
+        <div class="row">
+            <!-- Start Column 1 -->
+            <div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
+                <h2 class="mb-4 section-title">Best Selling Products</h2>
+                <p class="mb-4">Check out our most popular furniture pieces loved by our customers. These top-rated items combine style, quality, and functionality.</p>
+                <p><a href="index.php?page=shop" class="btn">View All Products</a></p>
+            </div> 
+            <!-- End Column 1 -->
 
-					<!-- Start Column 1 -->
-					<div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
-						<h2 class="mb-4 section-title">Crafted with excellent material.</h2>
-						<p class="mb-4">Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. </p>
-						<p><a href="shop.html" class="btn">Explore</a></p>
-					</div> 
-					<!-- End Column 1 -->
+            <?php if (!empty($data['topProducts'])): ?>
+                <?php foreach ($data['topProducts'] as $product): ?>
+                    <!-- Product Item -->
+                    <div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
+                        <div class="product-item" style="position: relative;">
+                            <img src="assets/images/products/<?= htmlspecialchars($product['image']) ?>" 
+                                 class="img-fluid product-thumbnail" 
+                                 alt="<?= htmlspecialchars($product['name']) ?>">
+                            <h3 class="product-title"><?= htmlspecialchars($product['name']) ?></h3>
+                            <strong class="product-price">Rp<?= number_format($product['price'], 0, ',', '.') ?></strong>
 
-					<!-- Start Column 2 -->
-					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-						<a class="product-item" href="cart.html">
-							<img src="/web-retail-rev/public/assets/images/product-1.png" class="img-fluid product-thumbnail">
-							<h3 class="product-title">Nordic Chair</h3>
-							<strong class="product-price">$50.00</strong>
+                            <?php if ($product['total_sold'] > 0): ?>
+                                <span class="badge bg-success" style="position: absolute; top: 10px; left: 10px;">
+                                    🔥 <?= $product['total_sold'] ?> Sold
+                                </span>
+                            <?php endif; ?>
 
-							<span class="icon-cross">
-								<img src="/web-retail-rev/public/assets/images/cross.svg" class="img-fluid">
-							</span>
-						</a>
-					</div> 
-					<!-- End Column 2 -->
+                            <!-- Link to Shop Instead of Add to Cart -->
+                            <a href="index.php?page=shop" class="icon-cross" title="View in Shop">
+                                <img src="assets/images/cross.svg" class="img-fluid">
+                            </a>
+                        </div>
+                    </div>
+                    <!-- End Product Item -->
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12 col-lg-9 text-center">
+                    <p class="text-muted">No products available at the moment.</p>
+                    <a href="index.php?page=shop" class="btn btn-secondary">Browse Shop</a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<!-- End Product Section -->
 
-					<!-- Start Column 3 -->
-					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-						<a class="product-item" href="cart.html">
-							<img src="/web-retail-rev/public/assets/images/product-2.png" class="img-fluid product-thumbnail">
-							<h3 class="product-title">Kruzo Aero Chair</h3>
-							<strong class="product-price">$78.00</strong>
+<!-- Start Why Choose Us Section -->
+<div class="why-choose-section">
+    <div class="container">
+        <div class="row justify-content-between">
+            <div class="col-lg-6">
+                <h2 class="section-title">Why Choose Us</h2>
+                <p>We provide the best furniture shopping experience with quality products, excellent service, and customer satisfaction guaranteed.</p>
 
-							<span class="icon-cross">
-								<img src="/web-retail-rev/public/assets/images/cross.svg" class="img-fluid">
-							</span>
-						</a>
-					</div>
-					<!-- End Column 3 -->
+                <div class="row my-5">
+                    <div class="col-6 col-md-6">
+                        <div class="feature">
+                            <div class="icon">
+                                <img src="assets/images/truck.svg" alt="Fast Shipping" class="imf-fluid">
+                            </div>
+                            <h3>Fast &amp; Free Shipping</h3>
+                            <p>Get your furniture delivered quickly and safely to your doorstep at no extra cost.</p>
+                        </div>
+                    </div>
 
-					<!-- Start Column 4 -->
-					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-						<a class="product-item" href="cart.html">
-							<img src="/web-retail-rev/public/assets/images/product-3.png" class="img-fluid product-thumbnail">
-							<h3 class="product-title">Ergonomic Chair</h3>
-							<strong class="product-price">$43.00</strong>
+                    <div class="col-6 col-md-6">
+                        <div class="feature">
+                            <div class="icon">
+                                <img src="assets/images/bag.svg" alt="Easy Shopping" class="imf-fluid">
+                            </div>
+                            <h3>Easy to Shop</h3>
+                            <p>Browse our extensive catalog and find exactly what you need with our user-friendly interface.</p>
+                        </div>
+                    </div>
 
-							<span class="icon-cross">
-								<img src="/web-retail-rev/public/assets/images/cross.svg" class="img-fluid">
-							</span>
-						</a>
-					</div>
-					<!-- End Column 4 -->
+                    <div class="col-6 col-md-6">
+                        <div class="feature">
+                            <div class="icon">
+                                <img src="assets/images/support.svg" alt="24/7 Support" class="imf-fluid">
+                            </div>
+                            <h3>24/7 Support</h3>
+                            <p>Our customer service team is always ready to help you with any questions or concerns.</p>
+                        </div>
+                    </div>
 
-				</div>
-			</div>
-		</div>
-		<!-- End Product Section -->
+                    <div class="col-6 col-md-6">
+                        <div class="feature">
+                            <div class="icon">
+                                <img src="assets/images/return.svg" alt="Easy Returns" class="imf-fluid">
+                            </div>
+                            <h3>Hassle Free Returns</h3>
+                            <p>Not satisfied? Return your purchase easily within 30 days for a full refund.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-		<!-- Start Why Choose Us Section -->
-		<div class="why-choose-section">
-			<div class="container">
-				<div class="row justify-content-between">
-					<div class="col-lg-6">
-						<h2 class="section-title">Why Choose Us</h2>
-						<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique.</p>
+            <div class="col-lg-5">
+                <div class="img-wrap">
+                    <img src="assets/images/why-choose-us-img.jpg" alt="Why Choose Us" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Why Choose Us Section -->
 
-						<div class="row my-5">
-							<div class="col-6 col-md-6">
-								<div class="feature">
-									<div class="icon">
-										<img src="/web-retail-rev/public/assets/images/truck.svg" alt="Image" class="imf-fluid">
-									</div>
-									<h3>Fast &amp; Free Shipping</h3>
-									<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
-								</div>
-							</div>
+<!-- Start Popular Product (Optional: You can remove this or make it dynamic too) -->
+<div class="popular-product">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">Ready to Start Shopping?</h2>
+                <p class="lead mb-4">Explore our full collection of quality furniture</p>
+                <a href="index.php?page=shop" class="btn btn-secondary btn-lg">Visit Shop</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Popular Product -->
 
-							<div class="col-6 col-md-6">
-								<div class="feature">
-									<div class="icon">
-										<img src="/web-retail-rev/public/assets/images/bag.svg" alt="Image" class="imf-fluid">
-									</div>
-									<h3>Easy to Shop</h3>
-									<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
-								</div>
-							</div>
+<style>
+/* Additional styles for home page */
+.product-item {
+    cursor: default;
+    transition: transform 0.3s ease;
+}
 
-							<div class="col-6 col-md-6">
-								<div class="feature">
-									<div class="icon">
-										<img src="/web-retail-rev/public/assets/images/support.svg" alt="Image" class="imf-fluid">
-									</div>
-									<h3>24/7 Support</h3>
-									<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
-								</div>
-							</div>
+.product-item:hover {
+    transform: translateY(-5px);
+}
 
-							<div class="col-6 col-md-6">
-								<div class="feature">
-									<div class="icon">
-										<img src="/web-retail-rev/public/assets/images/return.svg" alt="Image" class="imf-fluid">
-									</div>
-									<h3>Hassle Free Returns</h3>
-									<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
-								</div>
-							</div>
+.icon-cross {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-						</div>
-					</div>
+.icon-cross:hover {
+    transform: scale(1.2) rotate(90deg);
+}
 
-					<div class="col-lg-5">
-						<div class="img-wrap">
-							<img src="/web-retail-rev/public/assets/images/why-choose-us-img.jpg" alt="Image" class="img-fluid">
-						</div>
-					</div>
+.badge {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+    font-weight: 600 !important;
+}
 
-				</div>
-			</div>
-		</div>
+.section-title {
+    color: #2f2f2f;
+}
 
-		<!-- Start Popular Product -->
-		<div class="popular-product">
-			<div class="container">
-				<div class="row">
+.btn-secondary {
+    background-color: #3b5d50;
+    border-color: #3b5d50;
+}
 
-					<div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-						<div class="product-item-sm d-flex">
-							<div class="thumbnail">
-								<img src="/web-retail-rev/public/assets/images/product-1.png" alt="Image" class="img-fluid">
-							</div>
-							<div class="pt-3">
-								<h3>Nordic Chair</h3>
-								<p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio </p>
-								<p><a href="#">Read More</a></p>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-						<div class="product-item-sm d-flex">
-							<div class="thumbnail">
-								<img src="/web-retail-rev/public/assets/images/product-2.png" alt="Image" class="img-fluid">
-							</div>
-							<div class="pt-3">
-								<h3>Kruzo Aero Chair</h3>
-								<p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio </p>
-								<p><a href="#">Read More</a></p>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-						<div class="product-item-sm d-flex">
-							<div class="thumbnail">
-								<img src="/web-retail-rev/public/assets/images/product-3.png" alt="Image" class="img-fluid">
-							</div>
-							<div class="pt-3">
-								<h3>Ergonomic Chair</h3>
-								<p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio </p>
-								<p><a href="#">Read More</a></p>
-							</div>
-						</div>
-					</div>
-
-				</div>
-			</div>
-		</div>
+.btn-secondary:hover {
+    background-color: #2d4a3e;
+    border-color: #2d4a3e;
+}
+</style>
 
 <?php include '../app/views/includes/footer.php'; ?>
