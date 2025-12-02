@@ -1,68 +1,138 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-
 include_once __DIR__ . '/../includes/header.php';
 include_once __DIR__ . '/../includes/sidebar.php';
 ?>
 
 <div class="pt-6 px-4 w-full">
     <div class="bg-white shadow rounded-lg p-6">
+        <!-- Header -->
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-xl font-bold text-gray-900">Product Management</h3>
-            <button data-modal-target="add-product-modal" data-modal-toggle="add-product-modal" 
-                    class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center">
+            <button data-modal-target="add-product-modal" data-modal-toggle="add-product-modal"
+                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
                 Add Product
             </button>
         </div>
 
-        <div class="w-full overflow-x-auto">
+        <!-- Search Bar & Info -->
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex-1 max-w-md">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <input type="text"
+                        id="searchInput"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full pl-10 p-2.5"
+                        placeholder="Search by product, SKU, category, or supplier..."
+                        value="<?= htmlspecialchars($data['search'] ?? '') ?>">
+                </div>
+            </div>
+            <div class="ml-4">
+                <span id="showingInfo" class="text-sm text-gray-600">
+                    Showing <?= $data['pagination']['from'] ?> to <?= $data['pagination']['to'] ?>
+                    of <?= $data['pagination']['total_records'] ?> entries
+                </span>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="hidden">
+            <div class="flex items-center justify-center py-8">
+                <svg class="animate-spin h-8 w-8 text-cyan-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="ml-3 text-gray-600">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="w-full overflow-x-auto" id="tableContainer">
             <table class="w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="p-3">Image</th>
-                        <th class="p-3">Name</th>
-                        <th class="p-3">SKU</th>
-                        <th class="p-3">Category</th>
-                        <th class="p-3">Supplier</th>
-                        <th class="p-3">Stock</th>
-                        <th class="p-3">Price</th>
-                        <th class="p-3">Actions</th>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody id="productTableBody" class="bg-white divide-y divide-gray-200">
                     <?php if (empty($data['products'])): ?>
                         <tr>
-                            <td colspan="8" class="p-4 text-center text-gray-500">No products found</td>
+                            <td colspan="8" class="p-8 text-center text-gray-500">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                </svg>
+                                <p class="mt-2">No products found</p>
+                            </td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($data['products'] as $p): ?>
-                            <tr class="hover:bg-gray-100">
+                            <tr class="hover:bg-gray-50 transition">
                                 <td class="p-3">
-                                    <img src="/web-retail-rev/public/assets/images/products/<?= $p['image'] ?>" class="w-16 h-16 rounded">
+                                    <img src="/web-retail-rev/public/assets/images/products/<?= htmlspecialchars($p['image']) ?>"
+                                        class="w-16 h-16 rounded object-cover"
+                                        alt="<?= htmlspecialchars($p['product_name']) ?>">
                                 </td>
-                                <td class="p-3"><?= htmlspecialchars($p['product_name']) ?></td>
-                                <td class="p-3"><?= htmlspecialchars($p['sku']) ?></td>
-                                <td class="p-3"><?= htmlspecialchars($p['category_name']) ?></td>
-                                <td class="p-3"><?= htmlspecialchars($p['supplier_name']) ?></td>
-                                <td class="p-3"><?= $p['stock'] ?></td>
-                                <td class="p-3">Rp <?= number_format($p['price'], 0, ',', '.') ?></td>
                                 <td class="p-3">
-                                    <button class="edit-product-btn bg-cyan-600 text-white px-3 py-2 rounded text-xs"
-                                        data-modal-target="edit-product-modal"
-                                        data-modal-toggle="edit-product-modal"
-                                        data-id="<?= $p['id_product'] ?>"
-                                        data-name="<?= htmlspecialchars($p['product_name']) ?>"
-                                        data-sku="<?= htmlspecialchars($p['sku']) ?>"
-                                        data-price="<?= $p['price'] ?>"
-                                        data-stock="<?= $p['stock'] ?>"
-                                        data-category-id="<?= $p['id_category'] ?>"
-                                        data-supplier-id="<?= $p['id_supplier'] ?>">
-                                        Edit
-                                    </button>
-                                    <button class="delete-product-btn bg-red-600 text-white px-3 py-2 rounded text-xs"
-                                        data-id="<?= $p['id_product'] ?>">
-                                        Delete
-                                    </button>
+                                    <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($p['product_name']) ?></div>
+                                </td>
+                                <td class="p-3">
+                                    <span class="text-sm text-gray-600"><?= htmlspecialchars($p['sku']) ?></span>
+                                </td>
+                                <td class="p-3">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                        <?= htmlspecialchars($p['category_name']) ?>
+                                    </span>
+                                </td>
+                                <td class="p-3">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                                        <?= htmlspecialchars($p['supplier_name']) ?>
+                                    </span>
+                                </td>
+                                <td class="p-3">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded <?= $p['stock'] > 10 ? 'bg-green-100 text-green-800' : ($p['stock'] > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') ?>">
+                                        <?= $p['stock'] ?>
+                                    </span>
+                                </td>
+                                <td class="p-3">
+                                    <span class="text-sm font-semibold text-gray-900">Rp <?= number_format($p['price'], 0, ',', '.') ?></span>
+                                </td>
+                                <td class="p-3">
+                                    <div class="flex items-center space-x-2">
+                                        <button class="edit-product-btn bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1.5 rounded text-xs font-medium transition"
+                                            data-modal-target="edit-product-modal"
+                                            data-modal-toggle="edit-product-modal"
+                                            data-id="<?= $p['id_product'] ?>"
+                                            data-name="<?= htmlspecialchars($p['product_name']) ?>"
+                                            data-sku="<?= htmlspecialchars($p['sku']) ?>"
+                                            data-price="<?= $p['price'] ?>"
+                                            data-stock="<?= $p['stock'] ?>"
+                                            data-category-id="<?= $p['id_category'] ?>"
+                                            data-supplier-id="<?= $p['id_supplier'] ?>">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="delete-product-btn bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition"
+                                            data-id="<?= $p['id_product'] ?>">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -70,9 +140,71 @@ include_once __DIR__ . '/../includes/sidebar.php';
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination -->
+        <?php if ($data['pagination']['total_pages'] > 1): ?>
+            <div class="mt-6" id="paginationContainer">
+                <nav class="flex items-center justify-between">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        <!-- Mobile Pagination -->
+                        <button onclick="loadPage(<?= $data['pagination']['current_page'] - 1 ?>)"
+                            <?= !$data['pagination']['has_previous'] ? 'disabled' : '' ?>
+                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+                            Previous
+                        </button>
+                        <button onclick="loadPage(<?= $data['pagination']['current_page'] + 1 ?>)"
+                            <?= !$data['pagination']['has_next'] ? 'disabled' : '' ?>
+                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+                            Next
+                        </button>
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Page <span class="font-medium"><?= $data['pagination']['current_page'] ?></span>
+                                of <span class="font-medium"><?= $data['pagination']['total_pages'] ?></span>
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                <!-- Previous Button -->
+                                <button onclick="loadPage(<?= $data['pagination']['current_page'] - 1 ?>)"
+                                    <?= !$data['pagination']['has_previous'] ? 'disabled' : '' ?>
+                                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+
+                                <!-- Page Numbers -->
+                                <?php
+                                $start = max(1, $data['pagination']['current_page'] - 2);
+                                $end = min($data['pagination']['total_pages'], $data['pagination']['current_page'] + 2);
+
+                                for ($i = $start; $i <= $end; $i++):
+                                ?>
+                                    <button onclick="loadPage(<?= $i ?>)"
+                                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium <?= $i == $data['pagination']['current_page'] ? 'bg-cyan-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' ?>">
+                                        <?= $i ?>
+                                    </button>
+                                <?php endfor; ?>
+
+                                <!-- Next Button -->
+                                <button onclick="loadPage(<?= $data['pagination']['current_page'] + 1 ?>)"
+                                    <?= !$data['pagination']['has_next'] ? 'disabled' : '' ?>
+                                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
-
 <!-- Add Product Modal -->
 <div class="hidden overflow-x-hidden overflow-y-auto fixed top-4 left-0 right-0 md:inset-0 z-50 justify-center items-center h-modal sm:h-full" id="add-product-modal">
     <div class="relative w-full max-w-2xl px-4 h-full md:h-auto">

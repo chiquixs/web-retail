@@ -14,11 +14,29 @@ class ProductController {  // ✅ Hapus "Cms" dari nama class
     
     // Display product list page
     public function index() {
-        // Get all products with joins
-        $products = $this->model->getAllProducts();
+        // Get parameters
+        $page = isset($_GET['p']) ? max(1, intval($_GET['p'])) : 1;
+        $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        $perPage = 10;
         
+        // Check if AJAX request
+        $isAjax = isset($_GET['ajax']) && $_GET['ajax'] === '1';
+        
+        // Get paginated data
+        $result = $this->model->getProductsPaginated($page, $perPage, $search);
+        
+        // If AJAX, return JSON
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode($result);
+            exit;
+        }
+        
+        // Regular page load
         $data = [
-            'products' => $products
+            'products' => $result['products'],
+            'pagination' => $result['pagination'],
+            'search' => $search
         ];
         
         require_once '../app/views/cms/product/index.php';
