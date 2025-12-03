@@ -206,6 +206,34 @@ switch ($page) {
         }
         break;
 
+    // ===== ADMIN CUSTOMER MANAGEMENT =====
+    
+    case 'admin_customer':
+        if (empty($_SESSION['admin_logged_in'])) {
+            header("Location: index.php?page=login");
+            exit;
+        }
+
+        require_once '../app/controllers/cms/CustomerController.php';
+        $controller = new CustomerController($pdo);
+
+        $action = $_GET['action'] ?? 'index';
+
+        switch ($action) {
+            case 'add':
+                $controller->add($_POST);
+                break;
+            case 'update':
+                $controller->update($_POST);
+                break;
+            case 'delete':
+                $controller->delete($_POST);
+                break;
+            default:
+                $controller->index();
+        }
+        break;
+
     // ===== DEFAULT =====
     
     default:
