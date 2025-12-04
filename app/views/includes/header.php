@@ -33,7 +33,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 <body>
     <nav class="custom-navbar navbar navbar-expand-md navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="index.php?page=home">Blace<span>.</span></a>
+            <a class="navbar-brand" href="index.php?page=home">Shopify<span>.</span></a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni">
                 <span class="navbar-toggler-icon"></span>
@@ -46,9 +46,6 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
                     </li>
                     <li>
                         <a class="nav-link" href="index.php?page=shop">Shop</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="index.php?page=about">About us</a>
                     </li>
                 </ul>
 
