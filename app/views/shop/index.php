@@ -1,12 +1,12 @@
 <?php include '../app/views/includes/header.php'; ?>
 
-<div class="hero">
+<div class="hero" style="padding-top: 3rem; padding-bottom: 1rem;">
     <div class="container">
         <div class="row justify-content-between">
             <div class="col-lg-5">
-                <div class="intro-excerpt">
-                    <h1>Shop</h1>
-                    <p class="mb-4">Browse our collection of quality furniture</p>
+                <div class="intro-excerpt" >
+                    <!-- <h1 style="font-size: 40px;">Shop</h1> -->
+                    <p class="mb-2" style="font-size: 17px;">Browse our collection of quality furniture</p>
                 </div>
             </div>
         </div>
@@ -17,7 +17,7 @@
     <div class="container">
         <div class="row mb-4">
             <div class="col-12">
-                <h2 class="mb-4">Our Products</h2>
+                <h2 class="mb-4" style="text-align: center;" >Our Products</h2>
             </div>
         </div>
 

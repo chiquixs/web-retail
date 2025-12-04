@@ -1,29 +1,30 @@
 <?php
-// File: ../app/controllers/cms/CmsProductController.php
+// File: app/controllers/cms/cmsProductController.php
 
 require_once '../app/models/cms/ProductModel.php';
 
-class ProductController {  // ✅ Hapus "Cms" dari nama class
+class ProductController {
     private $model;
-
-    
 
     public function __construct($db) {
         $this->model = new ProductModel($db);
     }
     
-    // Display product list page
+    // ✅ ENHANCED: Display product list with pagination, search, filter, sort
     public function index() {
         // Get parameters
         $page = isset($_GET['p']) ? max(1, intval($_GET['p'])) : 1;
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        $categoryFilter = isset($_GET['category']) ? trim($_GET['category']) : 'all';
+        $sortBy = isset($_GET['sort_by']) ? trim($_GET['sort_by']) : 'id_product';
+        $sortOrder = isset($_GET['sort_order']) ? trim($_GET['sort_order']) : 'DESC';
         $perPage = 10;
         
         // Check if AJAX request
         $isAjax = isset($_GET['ajax']) && $_GET['ajax'] === '1';
         
-        // Get paginated data
-        $result = $this->model->getProductsPaginated($page, $perPage, $search);
+        // Get paginated data with filters
+        $result = $this->model->getProductsPaginated($page, $perPage, $search, $categoryFilter, $sortBy, $sortOrder);
         
         // If AJAX, return JSON
         if ($isAjax) {
@@ -32,15 +33,21 @@ class ProductController {  // ✅ Hapus "Cms" dari nama class
             exit;
         }
         
-        // Regular page load
+        // Regular page load - get categories for filter dropdown
+        $categories = $this->model->getCategories();
+        
         $data = [
             'products' => $result['products'],
             'pagination' => $result['pagination'],
+            'filters' => $result['filters'],
+            'categories' => $categories,
             'search' => $search
         ];
         
         require_once '../app/views/cms/product/index.php';
     }
+
+    // ... (method add, update, delete, getCategories, getSuppliers tetap sama)
 
     // Add new product
     public function add($request) {

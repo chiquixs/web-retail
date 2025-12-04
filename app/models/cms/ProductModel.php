@@ -9,9 +9,9 @@ class ProductModel {
     }
 
     /**
-     * ✅ NEW: Get products with pagination and search
+     * ✅ ENHANCED: Get products with pagination, search, filter, and sort
      */
-    public function getProductsPaginated($page = 1, $perPage = 10, $search = '') {
+    public function getProductsPaginated($page = 1, $perPage = 10, $search = '', $categoryFilter = '', $sortBy = 'id_product', $sortOrder = 'DESC') {
         try {
             $offset = ($page - 1) * $perPage;
             
@@ -19,6 +19,7 @@ class ProductModel {
             $whereClause = "WHERE 1=1";
             $params = [];
             
+            // Search filter
             if (!empty($search)) {
                 $whereClause .= " AND (
                     p.name ILIKE :search 
@@ -27,6 +28,31 @@ class ProductModel {
                     OR c.name ILIKE :search
                 )";
                 $params[':search'] = "%{$search}%";
+            }
+            
+            // Category filter
+            if (!empty($categoryFilter) && $categoryFilter !== 'all') {
+                $whereClause .= " AND p.id_category = :category";
+                $params[':category'] = $categoryFilter;
+            }
+            
+            // Validate sort column (prevent SQL injection)
+            $allowedSortColumns = ['id_product', 'product_name', 'sku', 'stock', 'price', 'category_name', 'supplier_name'];
+            $sortColumn = in_array($sortBy, $allowedSortColumns) ? $sortBy : 'id_product';
+            
+            // Validate sort order
+            $sortDirection = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
+            
+            // For aliased columns, we need to use the full expression
+            $sortExpression = $sortColumn;
+            if ($sortColumn === 'product_name') {
+                $sortExpression = 'p.name';
+            } elseif ($sortColumn === 'category_name') {
+                $sortExpression = 'c.name';
+            } elseif ($sortColumn === 'supplier_name') {
+                $sortExpression = 's.name';
+            } else {
+                $sortExpression = 'p.' . $sortColumn;
             }
             
             // Count total records
@@ -45,7 +71,7 @@ class ProductModel {
             $stmtCount->execute();
             $totalRecords = $stmtCount->fetch(PDO::FETCH_ASSOC)['total'];
             
-            // Get paginated data
+            // Get paginated data with sort
             $sql = "
                 SELECT 
                     p.id_product,
@@ -63,7 +89,7 @@ class ProductModel {
                 LEFT JOIN supplier s ON p.id_supplier = s.id_supplier
                 LEFT JOIN category c ON p.id_category = c.id_category
                 {$whereClause}
-                ORDER BY p.id_product DESC
+                ORDER BY {$sortExpression} {$sortDirection}
                 LIMIT :limit OFFSET :offset
             ";
             
@@ -95,6 +121,12 @@ class ProductModel {
                     'to' => $to,
                     'has_previous' => $page > 1,
                     'has_next' => $page < $totalPages
+                ],
+                'filters' => [
+                    'search' => $search,
+                    'category' => $categoryFilter,
+                    'sort_by' => $sortColumn,
+                    'sort_order' => $sortDirection
                 ]
             ];
             
@@ -111,11 +143,19 @@ class ProductModel {
                     'to' => 0,
                     'has_previous' => false,
                     'has_next' => false
+                ],
+                'filters' => [
+                    'search' => '',
+                    'category' => 'all',
+                    'sort_by' => 'id_product',
+                    'sort_order' => 'DESC'
                 ]
             ];
         }
     }
 
+    // ... (method lain tetap sama: getAllProducts, getProductById, addProduct, updateProduct, deleteProduct, getCategories, getSuppliers)
+    
     // Get all products with category and supplier info
     public function getAllProducts() {
         try {
@@ -144,21 +184,18 @@ class ProductModel {
         }
     }
 
-    // Get product by ID
     public function getProductById($id) {
         try {
             $sql = "SELECT * FROM product WHERE id_product = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':id' => $id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
-            
         } catch (PDOException $e) {
             error_log("ProductModel::getProductById Error: " . $e->getMessage());
             return null;
         }
     }
 
-    // Add new product
     public function addProduct($data) {
         try {
             $sql = "INSERT INTO product (id_category, id_supplier, name, sku, stock, price, image) 
@@ -178,17 +215,14 @@ class ProductModel {
             
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result['id_product'] ?? false;
-            
         } catch (PDOException $e) {
             error_log("ProductModel::addProduct Error: " . $e->getMessage());
             return false;
         }
     }
 
-    // Update product
     public function updateProduct($data) {
         try {
-            // Build SQL dynamically based on whether image is being updated
             if (isset($data['image'])) {
                 $sql = "UPDATE product 
                         SET id_category = :id_category,
@@ -227,46 +261,39 @@ class ProductModel {
             }
             
             return $stmt->execute($params);
-            
         } catch (PDOException $e) {
             error_log("ProductModel::updateProduct Error: " . $e->getMessage());
             return false;
         }
     }
 
-    // Delete product
     public function deleteProduct($id) {
         try {
             $sql = "DELETE FROM product WHERE id_product = :id";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([':id' => $id]);
-            
         } catch (PDOException $e) {
             error_log("ProductModel::deleteProduct Error: " . $e->getMessage());
             return false;
         }
     }
 
-    // Get all categories
     public function getCategories() {
         try {
             $sql = "SELECT id_category, name FROM category ORDER BY name ASC";
             $stmt = $this->db->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
         } catch (PDOException $e) {
             error_log("ProductModel::getCategories Error: " . $e->getMessage());
             return [];
         }
     }
 
-    // Get all suppliers
     public function getSuppliers() {
         try {
             $sql = "SELECT id_supplier, name FROM supplier ORDER BY name ASC";
             $stmt = $this->db->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
         } catch (PDOException $e) {
             error_log("ProductModel::getSuppliers Error: " . $e->getMessage());
             return [];
