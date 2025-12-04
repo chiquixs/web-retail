@@ -9,7 +9,7 @@ include_once __DIR__ . '/../includes/sidebar.php';
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-xl font-bold text-gray-900">Supplier Management</h3>
             <button data-modal-target="add-supplier-modal" data-modal-toggle="add-supplier-modal" 
-                    class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center">
+                    class="text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center">
                 Add Supplier
             </button>
         </div>
@@ -86,7 +86,7 @@ include_once __DIR__ . '/../includes/sidebar.php';
                 </form>
             </div>
             <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b">
-                <button type="button" id="btn-save-add-supplier" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Add Supplier</button>
+                <button type="button" id="btn-save-add-supplier" class="text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Add Supplier</button>
                 <button type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 text-center" data-modal-toggle="add-supplier-modal">Cancel</button>
             </div>
         </div>
@@ -121,7 +121,7 @@ include_once __DIR__ . '/../includes/sidebar.php';
                 </form>
             </div>
             <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b">
-                <button type="button" id="btn-save-edit-supplier" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Update Supplier</button>
+                <button type="button" id="btn-save-edit-supplier" class="text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Update Supplier</button>
                 <button type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 text-center" data-modal-toggle="edit-supplier-modal">Cancel</button>
             </div>
         </div>

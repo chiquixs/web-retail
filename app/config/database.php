@@ -2,11 +2,10 @@
 class Koneksi {
     private $host = "localhost";
     private $port = "5432";
-    // PERHATIKAN: Ganti nama database sesuai project ini
-    private $dbname = "web_retail"; 
+    
+    private $dbname = "db_toko_retail"; 
     private $user = "postgres";
-    private $password = "lovie180906"; // Isi password pgAdmin kamu jika ada
-
+    private $password = ""; 
     public $conn;
 
     public function getKoneksi()
