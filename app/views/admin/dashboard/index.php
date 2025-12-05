@@ -89,8 +89,123 @@
                 </div>
             </div>
         </div>
-
     </div>
+
+    <!-- REFRESH MV Penjualan Harian (Mengambil lebar penuh) -->
+    <div class="mb-6">
+        <a href="index.php?page=admin_refresh_mv_daily_sales_summary" 
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700">
+            🔄 Refresh Chart Penjualan Harian
+        </a>
+    </div>
+    <?php if (!empty($_SESSION['success_message'])): ?>
+        <div class="bg-green-100 text-green-800 p-3 rounded mb-4">
+            <?= $_SESSION['success_message']; unset($_SESSION['success_message']); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($_SESSION['error_message'])): ?>
+        <div class="bg-red-100 text-red-800 p-3 rounded mb-4">
+            <?= $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- Bagian 2: Chart Penjualan Harian (Mengambil lebar penuh) -->
+    <div class="bg-white p-6 rounded-lg shadow-xl border border-gray-200 mb-8 w-full">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Grafik Penjualan Harian</h2>
+        <canvas id="dailySalesChart"></canvas> 
+    </div>
+
+    <!-- REFRESH MV Tabel Best Selling Products -->
+    <div class="mb-6">
+        <a href="index.php?page=admin_refresh_mv_best_selling_products" 
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700">
+            🔄 Refresh Data Produk Terlaris
+        </a>
+    </div>
+    <?php if (!empty($_SESSION['best_selling_refresh_success'])): ?>
+        <div class="bg-green-100 text-green-800 p-3 rounded mb-4">
+            <?= $_SESSION['best_selling_refresh_success']; unset($_SESSION['best_selling_refresh_success']); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($_SESSION['best_selling_refresh_error'])): ?>
+        <div class="bg-red-100 text-red-800 p-3 rounded mb-4">
+            <?= $_SESSION['best_selling_refresh_error']; unset($_SESSION['best_selling_refresh_error']); ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- Bagian 3: Tabel View Best Selling Products -->
+    <style>
+        .pretty-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .pretty-table thead {
+            background: #2196f3;
+            color: white;
+            font-weight: bold;
+        }
+        .pretty-table th,
+        .pretty-table td {
+            padding: 14px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .pretty-table tbody tr:hover {
+            background: #f2f9ff;
+        }
+        .pretty-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .refresh-btn {
+            background: #2196f3;
+            border: none;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .refresh-btn:hover {
+            background: #0b7dda;
+            
+        }
+    </style>
+    <div class="pretty-table-wrapper">
+    <h3 style="color:black; font-weight: bold; margin-bottom: 10px;">🏆 Produk Terlaris</h3>
+    <table class="pretty-table">
+        <thead>
+            <tr>
+                <th>ID Produk</th>
+                <th>Nama Produk</th>
+                <th>Kategori</th>
+                <th>Supplier</th>
+                <th>Total Terjual</th>
+                <th>Pendapatan</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($bestSelling as $p): ?>
+                <tr>
+                    <td><?= $p['id_product'] ?></td>
+                    <td><?= $p['product'] ?></td>
+                    <td><?= $p['category'] ?></td>
+                    <td><?= $p['supplier'] ?></td>
+                    <td><?= $p['total_sold'] ?></td>
+                    <td>Rp <?= number_format($p['revenue_generated'], 0, ',', '.') ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
 </div>
 
 <?php require_once __DIR__ . '/../../cms/includes/footer.php'; ?>

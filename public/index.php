@@ -115,6 +115,46 @@ switch ($page) {
         $controller = new DashboardController($pdo);
         $controller->index();
         break;
+        
+    case 'admin_daily_sales':
+            if (empty($_SESSION['admin_logged_in'])) {
+                header("Location: index.php?page=login");
+                exit;
+            }
+            require_once '../app/controllers/admin/DashboardController.php';
+            $controller = new DashboardController($pdo);
+            $controller->getDailySalesData();
+        break;
+
+    case 'admin_refresh_mv_daily_sales_summary':
+        if (empty($_SESSION['admin_logged_in'])) {
+            header("Location: index.php?page=login");
+            exit;
+        }
+        require_once '../app/controllers/admin/DashboardController.php';
+        $controller = new DashboardController($pdo);
+        $controller->refreshDailySalesMV();
+        break;
+
+    case 'admin_best_selling_products':
+            if (empty($_SESSION['admin_logged_in'])) {
+                header("Location: index.php?page=login");
+                exit;
+            }
+            require_once '../app/controllers/admin/DashboardController.php';
+            $controller = new DashboardController($pdo);
+            $controller->getBestSellingProducts();
+        break;
+
+    case 'admin_refresh_mv_best_selling_products':
+        if (empty($_SESSION['admin_logged_in'])) {
+            header("Location: index.php?page=login");
+            exit;
+        }
+        require_once '../app/controllers/admin/DashboardController.php';
+        $controller = new DashboardController($pdo);
+        $controller->refreshBestSellingProductsMV();
+        break;
 
     // ===== ADMIN PRODUCT MANAGEMENT =====
     
