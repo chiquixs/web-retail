@@ -33,5 +33,10 @@
   <?php if (isset($_GET['page']) && $_GET['page'] === 'admin_supplier'): ?>
       <script src="../public/assets/js/admin/supplier.js"></script>
   <?php endif; ?>
+
+    <!-- Customer Page Script -->
+  <?php if (isset($_GET['page']) && $_GET['page'] === 'admin_customer'): ?>
+      <script src="../public/assets/js/admin/customer.js"></script>
+  <?php endif; ?>
 </body>
 </html>
