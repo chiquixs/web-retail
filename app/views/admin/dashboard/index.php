@@ -112,30 +112,31 @@
 
     <!-- Bagian 2: Chart Penjualan Harian (Mengambil lebar penuh) -->
     <div class="bg-white p-6 rounded-lg shadow-xl border border-gray-200 mb-8 w-full">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Grafik Penjualan Harian</h2>
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">GRAFIK PENJUALAN HARIAN</h2>
         <canvas id="dailySalesChart"></canvas> 
     </div>
 
+    
     <!-- REFRESH MV Tabel Best Selling Products -->
     <div class="mb-6">
         <a href="index.php?page=admin_refresh_mv_best_selling_products" 
         class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700">
-            🔄 Refresh Data Produk Terlaris
-        </a>
-    </div>
-    <?php if (!empty($_SESSION['best_selling_refresh_success'])): ?>
+        🔄 Refresh Data Produk Terlaris
+    </a>
+</div>
+<?php if (!empty($_SESSION['best_selling_refresh_success'])): ?>
         <div class="bg-green-100 text-green-800 p-3 rounded mb-4">
             <?= $_SESSION['best_selling_refresh_success']; unset($_SESSION['best_selling_refresh_success']); ?>
         </div>
-    <?php endif; ?>
-
-    <?php if (!empty($_SESSION['best_selling_refresh_error'])): ?>
-        <div class="bg-red-100 text-red-800 p-3 rounded mb-4">
-            <?= $_SESSION['best_selling_refresh_error']; unset($_SESSION['best_selling_refresh_error']); ?>
-        </div>
-    <?php endif; ?>
-
-    <!-- Bagian 3: Tabel View Best Selling Products -->
+        <?php endif; ?>
+        
+        <?php if (!empty($_SESSION['best_selling_refresh_error'])): ?>
+            <div class="bg-red-100 text-red-800 p-3 rounded mb-4">
+                <?= $_SESSION['best_selling_refresh_error']; unset($_SESSION['best_selling_refresh_error']); ?>
+            </div>
+            <?php endif; ?>
+            
+    <!-- Bagian 4: Tabel View Best Selling Products -->
     <style>
         .pretty-table {
             width: 100%;
@@ -148,6 +149,11 @@
         }
         .pretty-table thead {
             background: #2196f3;
+            color: white;
+            font-weight: bold;
+        }
+        .pretty-table thead{
+            background: #218ef3ff;
             color: white;
             font-weight: bold;
         }
@@ -177,35 +183,129 @@
             background: #0b7dda;
             
         }
-    </style>
-    <div class="pretty-table-wrapper">
-    <h3 style="color:black; font-weight: bold; margin-bottom: 10px;">🏆 Produk Terlaris</h3>
-    <table class="pretty-table">
-        <thead>
-            <tr>
-                <th>ID Produk</th>
-                <th>Nama Produk</th>
-                <th>Kategori</th>
-                <th>Supplier</th>
-                <th>Total Terjual</th>
-                <th>Pendapatan</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($bestSelling as $p): ?>
-                <tr>
-                    <td><?= $p['id_product'] ?></td>
-                    <td><?= $p['product'] ?></td>
-                    <td><?= $p['category'] ?></td>
-                    <td><?= $p['supplier'] ?></td>
-                    <td><?= $p['total_sold'] ?></td>
-                    <td>Rp <?= number_format($p['revenue_generated'], 0, ',', '.') ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
+        </style>
+        <div class="pretty-table-wrapper">
+            <h3 style="color:black; font-weight: bold; margin-bottom: 10px;">🏆 PRODUK TERLARIS</h3>
+            <table class="pretty-table">
+                <thead>
+                    <tr>
+                        <th>ID Produk</th>
+                        <th>Nama Produk</th>
+                        <th>Kategori</th>
+                        <th>Supplier</th>
+                        <th>Total Terjual</th>
+                        <th>Pendapatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($bestSelling as $p): ?>
+                        <tr>
+                            <td><?= $p['id_product'] ?></td>
+                            <td><?= $p['product'] ?></td>
+                            <td><?= $p['category'] ?></td>
+                            <td><?= $p['supplier'] ?></td>
+                            <td><?= $p['total_sold'] ?></td>
+                            <td>Rp <?= number_format($p['revenue_generated'], 0, ',', '.') ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Bagian 3: Profit Loss -->
+            <div class="pretty-table-wrapper">
+                <h3 style="color:black; font-weight: bold; margin-bottom: 10px;">⚖️ LABA RUGI</h3>
+                <table class="pretty-table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal Penjualan</th>
+                            <th>Total Pendapatan Kotor</th>
+                            <th>Total Modal (HPP)</th>
+                            <th>Laba Kotor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($profitLoss as $p): ?>
+                            <tr>
+                                <td><?= $p['sales_date'] ?></td>
+                                <td>Rp <?= number_format($p['total_revenue'], 0, ',', '.') ?></td>
+                                <td>Rp <?= number_format($p['estimated_cost'], 0, ',', '.') ?></td>
+                                <td>Rp <?= number_format($p['gross_profit'], 0, ',', '.') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+            <!-- Bagian 5: STOCK MONITOR -->
+            <div class="pretty-table-wrapper">
+                <h3 style="color:black; font-weight: bold; margin-bottom: 10px;">📦 STOK PRODUK</h3>
+                <h2 style="color:black; font-weight: bold; margin-bottom: 10px;">Notes: Low <= 20, Middle > 20, High >= 70</h2>
+                <table class="pretty-table">
+                    <thead>
+                        <tr>
+                            <th>ID Product</th>
+                            <th>SKU</th>
+                            <th>Produk</th>
+                            <th>ID Category</th>
+                            <th>ID Supplier</th>
+                            <th>Stok</th>
+                            <th>Harga</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($stockMonitor as $p): ?>
+                            <tr>
+                                <td><?= $p['id_product'] ?></td>
+                                <td><?= $p['sku'] ?></td>
+                                <td><?= $p['name'] ?></td>
+                                <td><?= $p['id_category'] ?></td>
+                                <td><?= $p['id_supplier'] ?></td>
+                                <td><?= $p['stock'] ?></td>
+                                <td>Rp <?= number_format($p['price'], 0, ',', '.') ?></td>
+                                <td><?= $p['stock_status'] ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bagian 6: HISTORY TRANSACTIONS -->
+            <div class="pretty-table-wrapper">
+                <h3 style="color:black; font-weight: bold; margin-bottom: 10px;">📝 HISTORY TRANSAKSI PELANGGAN</h3>
+                <table class="pretty-table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>ID Transaksi</th>
+                            <th>Pelanggan</th>
+                            <th>ID Produk</th>
+                            <th>Produk</th>
+                            <th>Kuantitas</th>
+                            <th>Harga</th>
+                            <th>Subtotal</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($history as $p): ?>
+                            <tr>
+                                <td><?= $p['tx_date'] ?></td>
+                                <td><?= $p['id_transaction'] ?></td>
+                                <td><?= $p['customer'] ?></td>
+                                <td><?= $p['id_product'] ?></td>
+                                <td><?= $p['product'] ?></td>
+                                <td><?= $p['qty'] ?></td>
+                                <td>Rp <?= number_format($p['product_price'], 0, ',', '.') ?></td>
+                                <td>Rp <?= number_format($p['subtotal'], 0, ',', '.') ?></td>
+                                <td>Rp <?= number_format($p['total_amount'], 0, ',', '.') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
 </div>
-
 <?php require_once __DIR__ . '/../../cms/includes/footer.php'; ?>

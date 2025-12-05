@@ -30,8 +30,20 @@ class DashboardController {
         $totalCategories = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
         
         // BEST SELLING PRODUCTS
-        $stmt = $this->db->query("SELECT * FROM mv_best_selling_products ORDER BY total_sold DESC");
+        $stmt = $this->db->query("SELECT * FROM mv_best_selling_products");
         $bestSelling = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // PROFIT LOSS DAILY
+        $stmt = $this->db->query("SELECT * FROM vw_profit_loss_daily");
+        $profitLoss = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // STOCK MONITOR
+        $stmt = $this->db->query("SELECT * FROM vw_stock_monitor");
+        $stockMonitor = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // HISTORY TRANSAKSI
+        $stmt = $this->db->query("SELECT * FROM vw_transaction_history");
+        $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Data dikirim ke view
         $data = [
@@ -41,6 +53,9 @@ class DashboardController {
             'totalSuppliers'     => $totalSuppliers,
             'totalCategories'     => $totalCategories,
             'bestSelling'       => $bestSelling,
+            'profitLoss'        => $profitLoss,
+            'stockMonitor'        => $stockMonitor,
+            'history'        => $history,
         ];
         // Di sini nanti kita bisa ambil data statistik (misal: jumlah produk, total penjualan)
         // Contoh: $totalProduk = $this->model->getTotalProducts();
@@ -111,5 +126,37 @@ class DashboardController {
         exit;
     }
 
+    public function getProfitLoss() {
+        $sql = "Select * from  vw_profit_loss_daily";
+
+        $stmt = $this->db->query($sql);
+        $profitLoss = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        header('Content-Type: application/json');
+        echo json_encode($profitLoss);
+        exit;    
+    }
+
+    public function getStockMonitor() {
+        $sql = "Select * from  vw_stock_monitor";
+
+        $stmt = $this->db->query($sql);
+        $stockMonitor = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        header('Content-Type: application/json');
+        echo json_encode($stockMonitor);
+        exit;    
+    }
+
+    public function getHistory() {
+        $sql = "Select * from  vw_transaction_history";
+
+        $stmt = $this->db->query($sql);
+        $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        header('Content-Type: application/json');
+        echo json_encode($history);
+        exit;    
+    }
 }
 ?>

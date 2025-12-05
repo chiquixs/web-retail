@@ -155,6 +155,36 @@ switch ($page) {
         $controller = new DashboardController($pdo);
         $controller->refreshBestSellingProductsMV();
         break;
+    
+    case 'admin_profit_loss':
+            if (empty($_SESSION['admin_logged_in'])) {
+                header("Location: index.php?page=login");
+                exit;
+            }
+            require_once '../app/controllers/admin/DashboardController.php';
+            $controller = new DashboardController($pdo);
+            $controller->getProfitLoss();
+        break;
+
+    case 'admin_stock_monitor':
+            if (empty($_SESSION['admin_logged_in'])) {
+                header("Location: index.php?page=login");
+                exit;
+            }
+            require_once '../app/controllers/admin/DashboardController.php';
+            $controller = new DashboardController($pdo);
+            $controller->getStockMonitor();
+        break;
+
+    case 'admin_history_transaction':
+            if (empty($_SESSION['admin_logged_in'])) {
+                header("Location: index.php?page=login");
+                exit;
+            }
+            require_once '../app/controllers/admin/DashboardController.php';
+            $controller = new DashboardController($pdo);
+            $controller->getHistory();
+        break;
 
     // ===== ADMIN PRODUCT MANAGEMENT =====
     
