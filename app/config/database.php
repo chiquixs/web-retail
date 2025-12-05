@@ -3,9 +3,9 @@ class Koneksi {
     private $host = "localhost";
     private $port = "5432";
     
-    private $dbname = "db_toko_retail"; 
+    private $dbname = "web_retail"; 
     private $user = "postgres";
-    private $password = ""; 
+    private $password = "lovie180906"; 
     public $conn;
 
     public function getKoneksi()
