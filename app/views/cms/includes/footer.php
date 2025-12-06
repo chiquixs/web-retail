@@ -38,5 +38,12 @@
   <?php if (isset($_GET['page']) && $_GET['page'] === 'admin_customer'): ?>
       <script src="../public/assets/js/admin/customer.js"></script>
   <?php endif; ?>
+
+  <!-- Chart Page Script -->
+  <?php if (isset($_GET['page']) && $_GET['page'] === 'admin_dashboard'): ?>
+      <script src="../public/assets/js/admin/chart-daily-sales.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <?php endif; ?>
+
 </body>
 </html>
