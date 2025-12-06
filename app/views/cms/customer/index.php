@@ -9,7 +9,7 @@ include_once __DIR__ . '/../includes/sidebar.php';
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-xl font-bold text-gray-900">Customer Management</h3>
             <button data-modal-target="add-customer-modal" data-modal-toggle="add-customer-modal"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center">
+                class="text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-pink-200 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center">
                 Add Customer
             </button>
         </div>
@@ -38,7 +38,7 @@ include_once __DIR__ . '/../includes/sidebar.php';
                                 <td class="p-3 text-sm text-gray-500"><?= htmlspecialchars($c['address'] ?? '-') ?></td>
 
                                 <td class="p-3 text-sm">
-                                    <button class="edit-customer-btn bg-cyan-600 text-white px-3 py-2 rounded text-xs mr-2"
+                                    <button class="edit-customer-btn bg-pink-600 text-white px-3 py-2 rounded text-xs mr-2"
                                         data-modal-target="edit-customer-modal"
                                         data-modal-toggle="edit-customer-modal"
                                         data-id="<?= $c['id_customer'] ?>"
@@ -96,7 +96,7 @@ include_once __DIR__ . '/../includes/sidebar.php';
             </div>
 
             <div class="flex items-center p-6 space-x-2 border-t rounded-b">
-                <button id="btn-save-add-customer" type="button" class="text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg text-sm px-5 py-2.5">
+                <button id="btn-save-add-customer" type="button" class="text-white bg-pink-600 hover:bg-pink-700 rounded-lg text-sm px-5 py-2.5">
                     Add Customer
                 </button>
 
@@ -147,7 +147,7 @@ include_once __DIR__ . '/../includes/sidebar.php';
             </div>
 
             <div class="flex items-center p-6 space-x-2 border-t rounded-b">
-                <button id="btn-save-edit-customer" type="button" class="text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg text-sm px-5 py-2.5">
+                <button id="btn-save-edit-customer" type="button" class="text-white bg-pink-600 hover:bg-pink-700 rounded-lg text-sm px-5 py-2.5">
                     Update Customer
                 </button>
 
